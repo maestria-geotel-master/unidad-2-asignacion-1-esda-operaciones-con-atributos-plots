@@ -250,10 +250,11 @@ proven17 %>%
 >     letra de los títulos de cada gráfico y la leyenda, en `theme(text
 >     = element_text(size = X))`; 2) Los rótulos de mapa en
 >     `geom_sf_text(..., size = X)`.
->   - La escala del color de relleno es logarítmica, y la define el
->     argumento `trans = 'log10'`. Puedes “jugar” quitando dicho
->     argumento, y notarás que los patrones se esconden, o que las
->     provincias que destacan son sólo aquellas con valores extremos.
+>   - La tabla de visulización de colores para el relleno usa escala
+>     logarítmica, y la define el argumento `trans = 'log10'`. Puedes
+>     “jugar” quitando dicho argumento, y notarás que los patrones se
+>     esconden, o que las provincias que destacan son sólo aquellas con
+>     valores extremos.
 
 ``` r
 #Rótulos: valor de la variable
@@ -332,7 +333,7 @@ proven17 %>% st_drop_geometry() %>%
 proven17 %>% st_drop_geometry() %>%
   dplyr::select(TOPONIMIA, contains('Principales problemas de su barrio o comunidad: ¿Otro problema?')) %>% 
   gather(variable, valor, -TOPONIMIA) %>% group_by(TOPONIMIA) %>%
-  mutate(pct=round(valor/sum(valor),2)) %>% dplyr::select(-valor) %>%
+  mutate(pct=round(valor/sum(valor)*100,2)) %>% dplyr::select(-valor) %>%
   spread(variable, pct) %>% kableExtra::kable()
 ```
 
@@ -342,8 +343,78 @@ proven17 %>% st_drop_geometry() %>%
 ... %>% st_drop_geometry() %>%
   dplyr::select(TOPONIMIA, contains('...')) %>% 
   gather(variable, valor, -TOPONIMIA) %>% group_by(TOPONIMIA) %>%
-  mutate(pct=round(valor/sum(valor),2)) %>% dplyr::select(-valor) %>%
+  mutate(pct=round(valor/sum(valor)*100,2)) %>% dplyr::select(-valor) %>%
   spread(variable, pct) %>% kableExtra::kable()
+```
+
+  - Genera un mapa con los porcentajes de respuestas de tu pregunta para
+    todo el país, usando la función `geom_sf` del paquete `ggplot2`;
+    coloca como rótulos los porcentajes para cada provincia.
+
+> Ejemplo del estudiante `hoyod`:
+
+``` r
+proven17 %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?'), TOPONIMIA) %>%
+  gather(variable, valor, -geom, -TOPONIMIA) %>% 
+  group_by(TOPONIMIA) %>% 
+  mutate(pct=round(valor/sum(valor)*100,2)) %>% dplyr::select(-valor) %>% 
+  ggplot() + aes(fill = pct) + geom_sf(lwd = 0.2) +
+  facet_wrap(~variable) + theme(text = element_text(size = 10)) +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, name = 'Reds')) +
+  geom_sf_text(aes(label=pct), check_overlap = T, size = 3)
+```
+
+**Tu turno**
+
+``` r
+... %>%
+  dplyr::select(contains('...'), TOPONIMIA) %>%
+  gather(variable, valor, -geom, -TOPONIMIA) %>% 
+  group_by(TOPONIMIA) %>% 
+  mutate(pct=round(valor/sum(valor)*100,2)) %>% dplyr::select(-valor) %>% 
+  ggplot() + aes(fill = pct) + geom_sf(lwd = 0.2) +
+  facet_wrap(~variable) + theme(text = element_text(size = 10)) +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, name = 'Reds')) +
+  geom_sf_text(aes(label=pct), check_overlap = T, size = 3)
+```
+
+  - Repite el mandato anterior, pero usando sólo una de las posibles
+    respuestas de tu pregunta. Elige una, la que prefieras.
+
+> Un ejemplo ilustra mejor. En el caso del estudiante ficticio, las
+> respuestas de la encuesta eran ‘Sí’ y ‘No’, por lo tanto, el
+> estudiante ficticio disponde de las columnas `Principales problemas de
+> su barrio o comunidad: ¿Otro problema?: Si` y `Principales problemas
+> de su barrio o comunidad: ¿Otro problema?: No`. Elijamos la segunda
+> opción (el truco está en la función `filter`):
+
+``` r
+proven17 %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?'), TOPONIMIA) %>%
+  gather(variable, valor, -geom, -TOPONIMIA) %>% 
+  group_by(TOPONIMIA) %>% 
+  mutate(pct=round(valor/sum(valor)*100,2)) %>% dplyr::select(-valor) %>% 
+  filter(variable %in% 'Principales problemas de su barrio o comunidad: ¿Otro problema?: No') %>% 
+  ggplot() + aes(fill = pct) + geom_sf(lwd = 0.2) +
+  facet_wrap(~variable) + theme(text = element_text(size = 10)) +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, name = 'Reds')) +
+  geom_sf_text(aes(label=pct), check_overlap = T, size = 3)
+```
+
+**Tu turno**
+
+``` r
+... %>%
+  dplyr::select(contains('...'), TOPONIMIA) %>%
+  gather(variable, valor, -geom, -TOPONIMIA) %>% 
+  group_by(TOPONIMIA) %>% 
+  mutate(pct=round(valor/sum(valor)*100,2)) %>% dplyr::select(-valor) %>% 
+  filter(variable %in% '...') %>% 
+  ggplot() + aes(fill = pct) + geom_sf(lwd = 0.2) +
+  facet_wrap(~variable) + theme(text = element_text(size = 10)) +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, name = 'Reds')) +
+  geom_sf_text(aes(label=pct), check_overlap = T, size = 3)
 ```
 
   - Imprime un resumen estadístico (mínimo, primer cuartil, mediana,
