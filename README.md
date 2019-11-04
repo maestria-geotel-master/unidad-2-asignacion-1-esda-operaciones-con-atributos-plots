@@ -1,47 +1,92 @@
 
-# Unidad 1, asignación 2: exportar datos, leer ráster y extraer valores
-
-Sigo ayudando con `...`. Donde quiera que los veas, deberás sustituirlos
-por lo que indique el correspondiente mandato.
+# Unidad 2, asignación 1: Análisis exploratorio de datos
 
 Dentro de las opciones de `knitr`, en el encabezado de este archivo, es
 probable que encuentres el argumento `eval = F`. Antes de tejer debes
 cambiarlo a `eval = T`, para que evalúe los bloques de código según tus
 cambios.
 
+El objetivo de esta asignación es que te familiarices con técnicas
+visuales y estadísticas de análisis exploratorio de datos espaciales,
+usando como referencia la capa de provincias dominicanas y los
+resultados de la Encuesta Nacional de Hogares de Propósitos Múltiples de
+2017 (ENHOGAR-2017, descripción
+[aquí](https://www.one.gob.do/encuestas/enhogar), datos fuente
+[aquí](http://redatam.one.gob.do/cgibin/RpWebEngine.exe/PortalAction?&MODE=MAIN&BASE=ENH2017&MAIN=WebServerMain.inl))
+
 ## Provincia asignada
 
-Toma nota del código de tu provincia asignada aleatoriamente.
+Toma nota del código de tu provincia asignada aleatoriamente. Los
+códigos fueron tomados desde el campo `ENLACE` de la capa
+`PROVCenso2010` del archivo `data/divisionRD.gpkg`
 
 ``` r
- # abreviatura provaleatoria
- #       acade            11
- #       agrie            09
- #       aleir            10
- #       arqco            16
- #       cindy            12
- #       franc            23
- #       geora            08
- #       hoyod            22
- #       ingan            07
- #       ingdi            19
- #       itac9            15
- #       ivanv            25
- #       lbine            30
- #       leona            24
- #       magda            20
- #       maryj            02
- #       masue            26
- #       mmvol            13
- #       naui2            29
- #       rober            27
- #       wilne            06
- #       yoenn            21
+ # abreviatura         ENLACE
+ #       acade           0405
+ #       agrie           0319
+ #       aleir           0320
+ #       arqco           0517
+ #       cindy           0415
+ #       franc           0707
+ #       geora           0314
+ #       hoyod           0616
+ #       ingan           0306
+ #       ingdi           0603
+ #       itac9           0502
+ #       ivanv           0808
+ #       lbine           0930
+ #       leona           0722
+ #       magda           0604
+ #       maryj           0118
+ #       masue           0811
+ #       mmvol           0426
+ #       naui2           0929
+ #       rober           0812
+ #       wilne           0228
+ #       yoenn           0610
+```
+
+## Pregunta asignada
+
+Toma nota de tu pregunta asignada aleatoriamente. Cada pregunta tiene
+varias posibles respuestas, todas excluyentes entre sí. Por ejemplo, la
+pregunta: `A qué cree que se debe la delincuencia en el país: ¿A la
+falta de lugares para practicar deportes?` tiene las posibles respuestas
+`Si` (número de hogares que respondieron `Sí`) y `No` (número de hogares
+que respondieron `No`). Nótese que otras preguntas tienen diferentes
+posibles respuestas; por ejemplo, `Sexo del jefe(a) del hogar` tiene
+como posibles respuestas `Hombre`, `Mujer`, `Sin información`.
+Finalmente, nótese que cada hogar sólo podía responder una de las
+alternativas.
+
+``` r
+#  [1] "acade, Grupo Socio-Económico"                                                                                                                                                            
+#  [2] "agrie, Principales problemas de su barrio o comunidad: ¿La educación?"                                                                                                                   
+#  [3] "aleir, Principales problemas de su barrio o comunidad: ¿La salud?"                                                                                                                       
+#  [4] "arqco, Principales problemas de su barrio o comunidad: ¿La acumulación de basura?"                                                                                                       
+#  [5] "cindy, Principales problemas de su barrio o comunidad: ¿La corrupción?"                                                                                                                  
+#  [6] "franc, A qué cree que se debe la delincuencia en el país: ¿A la falta de lugares para practicar deportes?"                                                                               
+#  [7] "geora, A qué cree que se debe la delincuencia en el país: ¿Otra causa?"                                                                                                                  
+#  [8] "hoyod, Principales problemas de su barrio o comunidad: ¿Otro problema?"                                                                                                                  
+#  [9] "ingan, A qué cree usted que se debe la delincuencia en su barrio o comunidad: ¿Otra causa?"                                                                                              
+# [10] "ingdi, Principales problemas de su barrio o comunidad: ¿El costo de la vida?"                                                                                                            
+# [11] "itac9, Sexo del jefe(a) del hogar"                                                                                                                                                       
+# [12] "ivanv, Principales problemas de su barrio o comunidad: ¿La delincuencia?"                                                                                                                
+# [13] "lbine, Desde noviembre del año pasado hasta la fecha, ¿Alguna de las personas de este hogar tuvo un accidente de tránsito mientra conducía un vehículo, motor o bicicleta?"              
+# [14] "leona, Principales problemas de su barrio o comunidad: ¿Calles, aceras y contenes en mal estado?"                                                                                        
+# [15] "magda, Desde noviembre del año pasado a la fecha ¿Alguna de las personas de este hogar fue atropellada por un vehículo, motor o bicicleta mientras caminaba o estaba parada en un lugar?"
+# [16] "maryj, Principales problemas de su barrio o comunidad: ¿No hay problemas en el barrio o comunidad?"                                                                                      
+# [17] "masue, A qué cree usted que se debe la delincuencia en su barrio o comunidad: ¿Educación familiar/falta de valores?"                                                                     
+# [18] "mmvol, Principales problemas de su barrio o comunidad: ¿La venta de drogas?"                                                                                                             
+# [19] "naui2, A qué cree usted que se debe la delincuencia en su barrio o comunidad: ¿A la falta de oportunidades para estudiar?"                                                               
+# [20] "rober, A qué cree usted que se debe la delincuencia en el país: ¿A la venta de drogas?"                                                                                                  
+# [21] "wilne, A qué cree que se debe la delincuencia en el país: ¿A la falta de oportunidades para estudiar?"                                                                                   
+# [22] "yoenn, A qué cree que se debe la delincuencia en el país: ¿Al consumo de drogas?"
 ```
 
 ## Paquetes
 
-  - Carga el paquete `sf` y el paquete `raster`.
+  - Carga el paquete `sf` y la colección `tidyverse`.
 
 <!-- end list -->
 
@@ -50,73 +95,240 @@ library(...)
 library(...)
 ```
 
-## Exporta
+## Datos y unión
 
-  - Determina el nombre de la capa provincias con `st_layers` del
-    archivo GeoPackage que se encuentra en la carpeta `data`.
+El objetivo de esta sección es que puedas unir dos fuentes: el objeto
+espacial con los límites de las provincias, y el objeto de atributos de
+“ENHOGAR 2017”.
+
+  - Carga el conjunto de datos de “ENHOGAR 2017”, asignándolo al objeto
+    `en17`. Este conjunto de datos está guardado como archivo `.csv` en
+    la carpeta `data` (único de su tipo en la carpeta).
+
+<!-- end list -->
+
+``` r
+... <- read.csv('...', check.names = F)
+```
+
+> El argumento `check.names = F` hace que la función `read.csv` respete
+> los espacios y caracteres especiales en los nombres de columnas.
 
   - Carga la capa de provincias con la función `st_read`, asignándola al
     objeto `prov`.
 
-  - Genera el objeto `miprov` que sólo contenga tu provincia.
-
-  - Usando la función `st_write`, exporta el objeto `miprov` como
-    GeoPackage a la carpeta `data` con el nombre `miprovexportado.gpkg`.
-
-  - Lee el archivo exportado con la función `st_read` y asígnalo al
-    objeto `miprovexportado`. Dado que sólo tiene una capa, no tienes
-    que especificar el argumento `layer`.
-
-  - Imprime en pantalla el objeto `miprovexportado` (sólo necesitas
-    escribir el nombre del objeto).
-
 <!-- end list -->
 
 ``` r
-st_layers('...')
 ... <- st_read(dsn = '...', layer = '...')
-... <- ...[prov$PROV %in% '...', ]
-st_write(obj = ..., dsn = 'data/...', driver = '...')
-... <- st_read(dsn = '...')
-...
 ```
 
-## Ráster
-
-  - Con la función `raster`, carga el modelo digital de elevaciones que
-    se encuentra en la carpeta `data`. Es el único archivo de extensión
-    `.tif` Asígnalo al objeto `mde`
-
-  - Genera un mapa con la función `plot`, usando la paleta de colores
-    `terrain.colors`.
+  - Imprime los nombres de columnas de `en17` (recuerda, el nombre de un
+    objeto en R no se rodea de comillas; las comillas sólo se usan para
+    cadenas de caracteres)
 
 <!-- end list -->
 
 ``` r
-... <- raster('data/...')
-plot(..., col = terrain.colors(n = 255))
+colnames(...)
 ```
 
-## Extraer valores del ráster
-
-  - Con la función `raster::extract`, extrae los valores de elevación
-    correspondientes a tu provincia. Utiliza `mde` como objeto ráster y
-    `miprov` como capa zonal. Asigna los valores al objeto `miprovele`.
-
-  - Imprime en pantalla el objeto `miprovele` (sólo necesitas escribir
-    el nombre del objeto).
-
-  - Obtén los estadísticos descriptivos básicos (mínimo, primer cuartil,
-    media, mediana, tercer cuartil, máximo) de `miprovele` con la
-    función `summary`.
-
-  - Genera un histograma de `miprovele` usando la función `hist`.
+  - Imprime los nombres de columnas de `prov`
 
 <!-- end list -->
 
 ``` r
-... <- raster::extract(..., ...)[[1]]
+colnames(...)
+```
+
+  - Las columnas a través de las cuales se pueden unir ambos conjuntos
+    son `en17$Código` y `prov$ENLACE`. Sin embargo, al igual que ocurría
+    con los datos del censo en el material de apoyo, la columna
+    `en17$Código` no conserva los ceros a la izquierda. En este caso,
+    dicha omisión ocurre en los códigos con 3 caracteres (los que tienen
+    4 caracteres están correctos). Visualiza ambas columnas para que
+    notes la discrepancia.
+
+<!-- end list -->
+
+``` r
+en17$...
+prov$...
+```
+
+  - Si intentaras hacer una unión, no daría resultados apropiados. Para
+    comprobarlo que dicha unión fallaría, utiliza la función `match`.
+
+<!-- end list -->
+
+``` r
+match(en17$... , prov$...)
+```
+
+  - Para resolver esta discrepancia, crea una columna en el objeto
+    `en17`, mediante la cual unirás este objeto con `prov`. Es
+    preferible que las columnas con las que se realizará la unión tengan
+    el mismo nombre. El objeto `prov` ya tiene una columna `ENLACE` con
+    códigos correctos, razón por la cual crearás una columna denominada
+    `ENLACE` en `en17`, corrigiendo al mismo tiempo los ceros a la
+    izquierda faltantes. Una forma de las formas más cómodas de
+    resolverlo es con la función `mutate`, creando una columna nueva a
+    partir de la columna `Código`. Para que la nueva columna contenga
+    los ceros a la izquierda faltantes, utiliza la función de condición
+    `ifelse`. Utiliza el material de apoyo como
+referencia.
+
+<!-- end list -->
+
+``` r
+... <- ... %>% mutate(... = ifelse(nchar(...)==3, paste0('0', ...), ...))
+```
+
+  - Imprime en pantalla la columna `ENLACE` creada en `en17`, e intenta
+    ahora el `match` entre ambas columnas `ENLACE` de los dos objetos,
+    `en17` y `prov`. Si tras ejecutar el `match` no aparecen `NA`,
+    entonces la unión puede realizarse sin problemas.
+
+<!-- end list -->
+
+``` r
+en17$...
+match(en17$... , prov$...)
+```
+
+  - Ahora haz la unión entre los conjuntos de datos `en17` y `prov`
+    mediante la función `inner_join` usando el campo `ENLACE`, el cual
+    existe en ambos objetos de manera consistente, siempre que hayas
+    ejecutado bien los códigos anteriores. Asigna el resultado al objeto
+    `proven17`, e imprímelo en pantalla.
+
+<!-- end list -->
+
+``` r
+... <- ... %>% inner_join(..., by = '...')
 ...
-summary(...)
-hist(...)
+```
+
+  - Genera un mapa con los resultados de tu pregunta para todo el país.
+
+> Un ejemplo ilustra cómo hacerlo. Supongamos el caso del estudiante
+> ficticio `hoyod`. Para extraer su pregunta utiliza la tubería `dplyr`,
+> la función `dplyr::select` y la función `contains`:
+
+``` r
+proven17 %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?')) %>%
+  plot(breaks = 'jenks')
+```
+
+**Tu turno**
+
+``` r
+... %>%
+  dplyr::select(contains('...')) %>%
+  plot(breaks = 'jenks')
+```
+
+  - Imprime una tabla, sin columna geométrica, mostrando las respuestas
+    a tu pregunta para todo el país.
+
+> Un ejemplo ilustra el caso del estudiante `hoyod`:
+
+``` r
+proven17 %>% st_drop_geometry() %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?'))
+```
+
+**Tu turno**
+
+``` r
+... %>% st_drop_geometry() %>%
+  dplyr::select(contains('...'))
+```
+
+  - Genera un histograma con escala logarítmica para cada respuesta
+    posible de tu pregunta:
+
+> Ejemplo de `hoyod`:
+
+``` r
+proven17 %>% st_drop_geometry() %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?')) %>%
+  select_if(is.numeric) %>% gather(variable, valor) %>%
+  ggplot + aes(x=valor) %>% geom_histogram(bins=10) +
+  scale_x_continuous(trans = 'log1p') + facet_grid(~variable)
+```
+
+**Tu turno**
+
+``` r
+... %>% st_drop_geometry() %>%
+  dplyr::select(contains('...')) %>%
+  select_if(is.numeric) %>%  gather(variable, valor) %>%
+  ggplot + aes(x=valor) %>% geom_histogram(bins=10) +
+  scale_x_continuous(trans = 'log1p') + facet_grid(~variable)
+```
+
+  - Genera un gráfico de barras en modo *dodge*, es decir, barras una al
+    lado de la otra, y barras apiladas
+
+> Ejemplo de `hoyod`:
+
+``` r
+#Barras una al lado de la otra (position = 'dodge')
+proven17 %>%
+  st_drop_geometry() %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?'), TOPONIMIA) %>%
+  gather(variable, valor, -TOPONIMIA) %>%
+  ggplot() + aes(x = TOPONIMIA, y = valor, fill = variable, group = variable) +
+  geom_col(position = 'dodge') + scale_y_continuous() +
+  theme(axis.text.x = element_text(angle = 90), text = element_text(size = 12)) + coord_flip()
+
+#Barras apiladas (position = 'fill')
+proven17 %>%
+  st_drop_geometry() %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?'), TOPONIMIA) %>%
+  gather(variable, valor, -TOPONIMIA) %>%
+  ggplot() + aes(x = TOPONIMIA, y = valor, fill = variable, group = variable) +
+  geom_col(position = 'fill') + scale_y_continuous() +
+  theme(axis.text.x = element_text(angle = 90), text = element_text(size = 12)) + coord_flip()
+```
+
+**Tu turno**
+
+``` r
+#Barras una al lado de la otra (position = 'dodge')
+... %>%
+  st_drop_geometry() %>%
+  dplyr::select(contains('...'), TOPONIMIA) %>%
+  gather(variable, valor, -TOPONIMIA) %>%
+  ggplot() + aes(x = TOPONIMIA, y = valor, fill = variable, group = variable) +
+  geom_col(position = 'dodge') + scale_y_continuous() +
+  theme(axis.text.x = element_text(angle = 90), text = element_text(size = 12))  + coord_flip()
+
+#Barras apiladas (position = 'fill')
+... %>%
+  st_drop_geometry() %>%
+  dplyr::select(contains('...'), TOPONIMIA) %>%
+  gather(variable, valor, -TOPONIMIA) %>%
+  ggplot() + aes(x = TOPONIMIA, y = valor, fill = variable, group = variable) +
+  geom_col(position = 'fill') + scale_y_continuous() +
+  theme(axis.text.x = element_text(angle = 90), text = element_text(size = 12))  + coord_flip()
+```
+
+  - Ahora genera una tabla que muestre las respuestas a tu pregunta en
+    tu provincia asignada:
+
+> El ejemplo del alumno `hoyod` sería tal que esto:
+
+``` r
+proven17 %>% st_drop_geometry() %>% filter(ENLACE=='0616') %>% 
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?'))
+```
+
+**Tu turno**
+
+``` r
+... %>% st_drop_geometry() %>% filter(ENLACE=='...') %>% 
+  dplyr::select(contains('...'))
 ```
