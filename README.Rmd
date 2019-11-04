@@ -154,9 +154,9 @@ match(en17$... , prov$...)
 ...
 ```
 
-* Genera un mapa con los resultados de tu pregunta para todo el país.
+* Genera un mapa con los resultados de tu pregunta para todo el país, usando la función `plot`.
 
-> Un ejemplo ilustra cómo hacerlo. Supongamos el caso del estudiante ficticio `hoyod`. Para extraer su pregunta utiliza la tubería `dplyr`, la función `dplyr::select` y la función `contains`:
+> Un ejemplo ilustra cómo hacerlo. Supongamos el caso del estudiante ficticio `hoyod`. Para extraer su pregunta, el `hoyod` utiliza el operador ` %>% `, la función `dplyr::select` y la función `contains`. Nota que este bloque de código de ejemplo, y los siguientes del alumno ficticio, están marcados como `eval=F`, para así evitar que generen resultados.
 
 ```{r, eval=F}
 proven17 %>%
@@ -172,22 +172,134 @@ __Tu turno__
   plot(breaks = 'jenks')
 ```
 
-* Imprime una tabla, sin columna geométrica, mostrando las respuestas a tu pregunta para todo el país.
+* Genera un mapa con los resultados de tu pregunta para todo el país, usando la función `geom_sf` del paquete `ggplot2`, colocando como rótulos los valores de cada provincia. Genera otro mapa colocando los nombres de las provincias.
+
+> El ejemplo del estudiante `hoyod` ilustra cómo hacerlo. Observa tres detalles:
+
+>   * La paleta utilizada es `brewer.pal` del paquete `RColorBrewer`, define gradientes apropiados para la representación. Si escribe en la consola `RColorBrewer::display.brewer.all()`, se desplegarán todas las posibles paletas del paquete.
+>   * Puedes definir el tamaño de la letra de los mapas. En el ejemplo, verás que se configuran dos tipos de letra mediante `size`: 1) La letra de los títulos de cada gráfico y la leyenda, en `theme(text = element_text(size = X))`; 2) Los rótulos de mapa en `geom_sf_text(..., size = X)`.
+>   * La escala del color de relleno es logarítmica, y la define el argumento `trans = 'log10'`. Puedes "jugar" quitando dicho argumento, y notarás que los patrones se esconden, o que las provincias que destacan son sólo aquellas con valores extremos.
+
+```{r, eval=F}
+#Rótulos: valor de la variable
+proven17 %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?')) %>%
+  gather(variable, valor, -geom) %>% 
+  ggplot() + aes(fill = valor) + geom_sf(lwd = 0.2) +
+  facet_wrap(~variable) + theme(text = element_text(size = 10)) +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, name = 'Reds'), trans = 'log10') +
+  geom_sf_text(aes(label=valor), check_overlap = T, size = 3)
+
+#Rótulos: nombres de las provincias
+proven17 %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?'), TOPONIMIA) %>%
+  gather(variable, valor, -geom, -TOPONIMIA) %>% 
+  ggplot() + aes(fill = valor) + geom_sf(lwd = 0.2) +
+  facet_wrap(~variable) + theme(text = element_text(size = 10)) +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, name = 'Reds'), trans = 'log10') +
+  geom_sf_text(aes(label=TOPONIMIA), check_overlap = T, size = 3)
+```
+
+__Tu turno__
+
+```{r}
+#Rótulos: valor de la variable
+... %>%
+  dplyr::select(contains('...')) %>%
+  gather(variable, valor, -geom) %>% 
+  ggplot() + aes(fill = valor) + geom_sf(lwd = 0.2) +
+  facet_wrap(~variable) + theme(text = element_text(size = 10)) +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, name = 'Reds'), trans = 'log10') +
+  geom_sf_text(aes(label=valor), check_overlap = T, size = 3)
+
+#Rótulos: nombres de las provincias
+... %>%
+  dplyr::select(contains('...'), TOPONIMIA) %>%
+  gather(variable, valor, -geom, -TOPONIMIA) %>% 
+  ggplot() + aes(fill = valor) + geom_sf(lwd = 0.2) +
+  facet_wrap(~variable) + theme(text = element_text(size = 10)) +
+  scale_fill_gradientn(colours = RColorBrewer::brewer.pal(9, name = 'Reds'), trans = 'log10') +
+  geom_sf_text(aes(label=TOPONIMIA), check_overlap = T, size = 3)
+
+```
+
+* Imprime una tabla, sin columna geométrica, mostrando las respuestas a tu pregunta para todo el país, incluyendo la columna `TOPONIMIA`.
 
 > Un ejemplo ilustra el caso del estudiante `hoyod`:
 
 ```{r, eval=F}
 proven17 %>% st_drop_geometry() %>%
-  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?'))
+  dplyr::select(TOPONIMIA, contains('Principales problemas de su barrio o comunidad: ¿Otro problema?'))
 ```
 
 __Tu turno__
 
 ```{r}
 ... %>% st_drop_geometry() %>%
-  dplyr::select(contains('...'))
+  dplyr::select(TOPONIMIA, contains('...'))
 ```
 
+* Imprime una tabla, sin columna geométrica, mostrando los porcentajes de cada respuesta a tu pregunta para todo el país, incluyendo la columna `TOPONIMIA` y relativizando las respuestas para cada provincia.
+
+> Un ejemplo ilustra el caso del estudiante `hoyod`. Tres operaciones son clave en este proceso: 1) `gather` que reúne sólo las columnas numéricas, sin la de nombres de provincias (por eso verás `-TOPONIMIA`). 2) Las funciones `mutate` y `spread`, la primera genera el porcentaje por provincias, y la segunda distribuye los datos por columnas. 3) La función `kable`, del paquete `kableExtra`, genera una tabla en formato HTML, más organizada y legible que el resultado que devuelve la consola.
+
+```{r, eval=F}
+proven17 %>% st_drop_geometry() %>%
+  dplyr::select(TOPONIMIA, contains('Principales problemas de su barrio o comunidad: ¿Otro problema?')) %>% 
+  gather(variable, valor, -TOPONIMIA) %>% group_by(TOPONIMIA) %>%
+  mutate(pct=round(valor/sum(valor),2)) %>% dplyr::select(-valor) %>%
+  spread(variable, pct) %>% kableExtra::kable()
+```
+
+__Tu turno__
+
+```{r}
+... %>% st_drop_geometry() %>%
+  dplyr::select(TOPONIMIA, contains('...')) %>% 
+  gather(variable, valor, -TOPONIMIA) %>% group_by(TOPONIMIA) %>%
+  mutate(pct=round(valor/sum(valor),2)) %>% dplyr::select(-valor) %>%
+  spread(variable, pct) %>% kableExtra::kable()
+```
+
+* Imprime un resumen estadístico (mínimo, primer cuartil, mediana, media, tercer cuartil, máximo) de las respuestas a tu pregunta para todo el país.
+
+> Un ejemplo ilustra el caso del estudiante `hoyod`:
+
+```{r, eval=F}
+proven17 %>% st_drop_geometry() %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?')) %>% 
+  summary
+```
+
+__Tu turno__
+
+```{r}
+... %>% st_drop_geometry() %>%
+  dplyr::select(contains('...')) %>% 
+  summary
+```
+
+* Genera un histograma para cada respuesta posible de tu pregunta:
+
+> Ejemplo de `hoyod` (la clave aquí es el `facet_grid`):
+
+```{r, eval=F}
+proven17 %>% st_drop_geometry() %>%
+  dplyr::select(contains('Principales problemas de su barrio o comunidad: ¿Otro problema?')) %>%
+  select_if(is.numeric) %>% gather(variable, valor) %>%
+  ggplot + aes(x=valor) %>% geom_histogram(bins=5) +
+  facet_grid(~variable)
+```
+
+__Tu turno__ (Tip: edita el argumento `bins` dentro de la función `geom_histogram` para adaptarlo a tus datos)
+
+```{r}
+... %>% st_drop_geometry() %>%
+  dplyr::select(contains('...')) %>%
+  select_if(is.numeric) %>%  gather(variable, valor) %>%
+  ggplot + aes(x=valor) %>% geom_histogram(bins=10) +
+  scale_x_continuous(trans = 'log1p') + facet_grid(~variable)
+```
 
 * Genera un histograma con escala logarítmica para cada respuesta posible de tu pregunta:
 
@@ -201,7 +313,7 @@ proven17 %>% st_drop_geometry() %>%
   scale_x_continuous(trans = 'log1p') + facet_grid(~variable)
 ```
 
-__Tu turno__
+__Tu turno__  (Tip: edita el argumento `bins` dentro de la función `geom_histogram` para adaptarlo a tus datos)
 
 ```{r}
 ... %>% st_drop_geometry() %>%
